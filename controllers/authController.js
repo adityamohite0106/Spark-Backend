@@ -23,13 +23,17 @@ exports.signup = async (req, res) => {
       return res.status(400).json({ error: "User already exists" });
     }
 
-    // ✅ No manual hashing - Let `pre("save")` handle it
     const newUser = new User({ firstName, lastName, email, password });
-
     await newUser.save();
     console.log("✅ User saved successfully.");
 
-    res.status(201).json({ message: "User registered successfully" });
+    // Generate JWT token
+    const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, { expiresIn: "24h" });
+
+    res.status(201).json({
+      token,
+      user: { email: newUser.email, firstName: newUser.firstName },
+    });
   } catch (err) {
     console.error("❌ Error during signup:", err);
     res.status(500).json({ error: "An error occurred during signup. Please try again." });
@@ -95,34 +99,27 @@ exports.signin = async (req, res) => {
   
 
 exports.checkUser = async (req, res) => {
+  const { firstName } = req.body;
+  const token = req.headers.authorization?.split(" ")[1];
+
+  if (!token || !firstName) {
+    return res.status(400).json({ error: "Missing token or firstName" });
+  }
+
   try {
-    const { firstName } = req.body;
-    const token = req.headers.authorization?.split(" ")[1];
-
-    console.log("🟢 Checking user:", firstName);
-
-    if (!token || !firstName) {
-      console.log("🛑 Missing token or firstName");
-      return res.status(400).json({ error: "Missing token or firstName" });
-    }
-
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findOne({ firstName, _id: decoded.userId });
 
     if (!user) {
-      console.log("🛑 User not found:", firstName);
       return res.status(404).json({ error: "User not found" });
     }
 
-    console.log("✅ User found:", user.firstName);
-    res.status(200).json({ message: "User exists", user: { email: user.email, firstName: user.firstName } });
-
+    res.json({ user: { email: user.email, firstName: user.firstName } });
   } catch (err) {
-    console.error("❌ Error checking user:", err);
+    console.error(err);
     res.status(401).json({ error: "Invalid token" });
   }
 };
-
   
   
   exports.updateUserProfile = async (req, res) => {
