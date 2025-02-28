@@ -94,30 +94,34 @@ exports.signin = async (req, res) => {
   
   
 
-  exports.checkUser = async (req, res) => {
-    try {
-      const { firstName } = req.body;
-  
-      console.log("🟢 Checking user:", firstName);
-  
-      if (!firstName) {
-        return res.status(400).json({ error: "Username is required" });
-      }
-  
-      const user = await User.findOne({ firstName });
-  
-      if (!user) {
-        console.log("🛑 User not found:", firstName);
-        return res.status(400).json({ error: "Username not found" }); // ✅ Custom error message
-      }
-  
-      console.log("✅ User found:", user.firstName);
-      res.status(200).json({ message: "User exists", user });
-    } catch (err) {
-      console.error("❌ Error checking user:", err);
-      res.status(500).json({ error: "An error occurred. Please try again." });
+exports.checkUser = async (req, res) => {
+  try {
+    const { firstName } = req.body;
+    const token = req.headers.authorization?.split(" ")[1];
+
+    console.log("🟢 Checking user:", firstName);
+
+    if (!token || !firstName) {
+      console.log("🛑 Missing token or firstName");
+      return res.status(400).json({ error: "Missing token or firstName" });
     }
-  };
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findOne({ firstName, _id: decoded.userId });
+
+    if (!user) {
+      console.log("🛑 User not found:", firstName);
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    console.log("✅ User found:", user.firstName);
+    res.status(200).json({ message: "User exists", user: { email: user.email, firstName: user.firstName } });
+
+  } catch (err) {
+    console.error("❌ Error checking user:", err);
+    res.status(401).json({ error: "Invalid token" });
+  }
+};
 
   
   
