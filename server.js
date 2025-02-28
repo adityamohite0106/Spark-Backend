@@ -1,7 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
-const cors = require("cors");
 const path = require("path");
 
 // ✅ Load environment variables
@@ -10,28 +9,30 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ✅ Allow both local and deployed frontend
+const cors = require("cors");
+
 const allowedOrigins = [
-  
- "http://localhost:5173"
+  "http://localhost:5175", // Your local frontend (Check Vite port)
+  "https://spark-frontend-rosy.vercel.app" // Your deployed frontend (Vercel)
 ];
 
-// ✅ Apply CORS before defining routes
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    methods: "GET,POST,PUT,DELETE",
-    credentials: true, // ✅ Allow cookies & authentication
-    allowedHeaders: ["Content-Type", "Authorization"], // ✅ Allow required headers
-  })
-);
-app.options("*", cors()); // Enable pre-flight
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: "GET,POST,PUT,DELETE",
+  credentials: true, // Allow cookies/authentication
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
+// ✅ Important: Enable CORS Preflight for All Routes
+app.options("*", cors());
+
+
 
 // ✅ Middleware (Must be before routes)
 app.use(express.json()); // Allows Express to parse JSON requests
