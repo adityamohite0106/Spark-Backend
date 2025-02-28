@@ -48,7 +48,6 @@ exports.signup = async (req, res) => {
 exports.signin = async (req, res) => {
   try {
     console.log("🟢 Received Signin Request:", req.body);
-
     const { identifier, password } = req.body;
 
     if (!identifier || !password) {
@@ -56,37 +55,20 @@ exports.signin = async (req, res) => {
     }
 
     const user = await User.findOne({ $or: [{ email: identifier }, { firstName: identifier }] });
-
     if (!user) {
       return res.status(400).json({ error: "User not found" });
     }
 
-    console.log("✅ User found in DB:", user.email);
-    console.log("🔍 Hashed Password in DB:", user.password);
-    console.log("🔍 Entered Password:", password);
-
-    // ✅ Use the comparePassword method from the User model
     const isMatch = await user.comparePassword(password);
-
-    console.log("🔍 Password Match Result:", isMatch);
-
     if (!isMatch) {
       return res.status(400).json({ error: "Invalid credentials" });
     }
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "24h" });
-
-    console.log("🟢 Login successful for:", user.email);
-
     res.status(200).json({
       token,
-      user: {
-        id: user._id,
-        firstName: user.firstName,
-        email: user.email,
-      },
+      user: { id: user._id, firstName: user.firstName, email: user.email },
     });
-
   } catch (err) {
     console.error("❌ Error during signin:", err);
     res.status(500).json({ error: "An error occurred during signin. Please try again." });
