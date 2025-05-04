@@ -38,13 +38,13 @@ userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
   try {
-    console.log("🔍 Hashing password for:", this.email);
+   
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
-    console.log("✅ Hashed Password:", this.password); // ✅ Log hashed password
+   
     next();
   } catch (err) {
-    console.error("❌ Error hashing password:", err);
+    
     next(err);
   }
 });

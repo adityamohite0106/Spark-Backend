@@ -69,7 +69,6 @@ exports.getDeviceStats = async (req, res) => {
 
     res.status(200).json(deviceStats);
   } catch (error) {
-    console.error("Error fetching device stats:", error);
     res.status(500).json({ error: "Failed to fetch device stats" });
   }
 };

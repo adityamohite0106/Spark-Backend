@@ -3,10 +3,8 @@ const jwt = require('jsonwebtoken'); // Import JWT
 const bcrypt = require('bcryptjs'); // Import bcrypt for password hashing
 
 
-
 exports.signup = async (req, res) => {
   try {
-    console.log("🟢 Received Signup Request:", req.body);
 
     const { firstName, lastName, email, password, confirmPassword } = req.body;
     
@@ -25,7 +23,6 @@ exports.signup = async (req, res) => {
 
     const newUser = new User({ firstName, lastName, email, password });
     await newUser.save();
-    console.log("✅ User saved successfully.");
 
     // Generate JWT token
     const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, { expiresIn: "24h" });
@@ -35,19 +32,14 @@ exports.signup = async (req, res) => {
       user: { email: newUser.email, firstName: newUser.firstName },
     });
   } catch (err) {
-    console.error("❌ Error during signup:", err);
     res.status(500).json({ error: "An error occurred during signup. Please try again." });
   }
 };
 
 
-
-  
-  
-
 exports.signin = async (req, res) => {
   try {
-    console.log("🟢 Received Signin Request:", req.body);
+   
     const { identifier, password } = req.body;
 
     if (!identifier || !password) {
@@ -70,15 +62,11 @@ exports.signin = async (req, res) => {
       user: { id: user._id, firstName: user.firstName, email: user.email },
     });
   } catch (err) {
-    console.error("❌ Error during signin:", err);
+    
     res.status(500).json({ error: "An error occurred during signin. Please try again." });
   }
 };
 
-
-
-  
-  
 
 exports.checkUser = async (req, res) => {
   const { firstName } = req.body;
@@ -98,7 +86,7 @@ exports.checkUser = async (req, res) => {
 
     res.json({ user: { email: user.email, firstName: user.firstName } });
   } catch (err) {
-    console.error(err);
+   
     res.status(401).json({ error: "Invalid token" });
   }
 };
@@ -127,7 +115,7 @@ exports.checkUser = async (req, res) => {
   
       res.status(200).json({ message: "Profile updated successfully", user });
     } catch (error) {
-      console.error("Error updating profile:", error);
+      
       res.status(500).json({ message: "Server error" });
     }
   };

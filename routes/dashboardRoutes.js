@@ -1,4 +1,3 @@
-// routes/dashboardRoutes.js
 const express = require("express");
 const router = express.Router();
 const dashboardController = require("../controllers/dashboardController");
@@ -29,6 +28,9 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 },
 });
 
+// Use environment variable for base URL
+const BASE_URL = process.env.BASE_URL || "https://spark-backend-apj9.onrender.com";
+
 router.get("/", dashboardController.getDashboardData);
 router.put("/", dashboardController.updateDashboardData);
 router.delete("/", dashboardController.deleteDashboardData);
@@ -38,11 +40,11 @@ router.post("/upload", auth, upload.single("profileImage"), (req, res) => {
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
-    const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
-    console.log("Image saved at:", imageUrl); // Debug log
+    const imageUrl = `${BASE_URL}/uploads/${req.file.filename}`; // Use BASE_URL instead of req.protocol
+  
     res.status(200).json({ imageUrl });
   } catch (error) {
-    console.error("Error uploading image:", error);
+   
     res.status(500).json({ message: "Server error" });
   }
 });

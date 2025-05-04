@@ -17,7 +17,6 @@ exports.getDashboardData = async (req, res) => {
 
     res.status(200).json(dashboard);
   } catch (error) {
-    console.error("❌ Error fetching dashboard:", error);
     res.status(500).json({ message: "❌ Failed to fetch dashboard", error: error.message });
   }
 };
@@ -35,7 +34,6 @@ exports.updateDashboardData = async (req, res) => {
     let dashboard = await Dashboard.findOne({ email });
 
     if (dashboard) {
-      console.log("🔹 Updating existing dashboard for:", email);
       dashboard.profile = profile || dashboard.profile;
       dashboard.links = links || dashboard.links;
       dashboard.mobLinks = mobLinks || dashboard.mobLinks;
@@ -44,14 +42,12 @@ exports.updateDashboardData = async (req, res) => {
       dashboard.settings = settings || dashboard.settings;
       await dashboard.save();
     } else {
-      console.log("🔹 Creating new dashboard for:", email);
       dashboard = new Dashboard({ email, profile, links, mobLinks, appearance, analytics, settings });
       await dashboard.save();
     }
 
     res.status(200).json({ message: "✅ Dashboard updated successfully!", dashboard });
   } catch (error) {
-    console.error("❌ Error updating dashboard:", error);
     res.status(500).json({ message: "❌ Failed to update dashboard", error: error.message });
   }
 };
@@ -73,7 +69,6 @@ exports.deleteDashboardData = async (req, res) => {
 
     res.status(200).json({ message: "✅ Dashboard data deleted successfully" });
   } catch (error) {
-    console.error("❌ Error deleting dashboard data:", error);
     res.status(500).json({ message: "❌ Failed to delete dashboard data", error: error.message });
   }
 };
